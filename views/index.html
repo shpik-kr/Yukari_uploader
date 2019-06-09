@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>
+		Yukari Uploader
+	</title>
+	<script	src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+	<link href="https://fonts.googleapis.com/css?family=Kosugi+Maru|Roboto+Mono&display=swap" rel="stylesheet">
+	<style>
+		body{
+			background: url("/img/bg.jpg");
+		}
+		.back_mask {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			opacity: 1;
+			background-image: url('/img/dots_01.png');
+			z-index: -1;
+		}
+		.drop_sandbox {
+			border-radius: 2rem;
+			width:  80%;
+			height: 300px;
+			margin: 20% auto;
+			z-index: 1;
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+			opacity: 0.7;
+			border-radius: 2rem;
+			background-color: white;
+		}
+		.drop_sandbox>div{
+			flex: none;
+			margin: auto auto;
+			font-family: 'Roboto Mono', 'Kosugi Maru', monospace;
+		}
+		.drop_sandbox>div>p{
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<script>
+		function dropHandler(ev){
+			ev.preventDefault();
+			if(ev.dataTransfer.files){
+                var uf = "";
+                var data = '';
+                document.getElementById("text_sandbox").innerHTML = '';
+				for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+                    data = fileUpload(ev.dataTransfer.files[i]);
+                }
+            }
+		}
+		function dragOverHandler(ev){
+			ev.preventDefault();
+		}
+		function fileUpload(fileObj){
+			if(fileObj!=undefined){
+                var form = new FormData();
+                var res = '';
+                var div = document.getElementById("text_sandbox");
+				form.append('file',fileObj);
+				$.ajax({
+					type: 'POST',
+					url: '/upload',
+					data: form,
+					processData: false,
+					contentType: false,
+					success: function(data){
+                        console.log(data.result);
+                        if(data.result){
+                            res = `<p>${fileObj.name} => ${data.filename} [<a href="/upload/${data.filename}">Downlaod</a>]</p>`;
+                            div.innerHTML += res;
+                        }else{
+                            console.log('Error occured.');
+                            console.log(data.reason);
+                            res = `<p>${fileObj.name} => ERROR!!! Check development tools.</p>`;
+                            div.innerHTML += res;
+                        }
+					},
+				})
+            }
+		}
+	</script>
+	<div class="back_mask"></div>
+	<div class="drop_sandbox" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+		<div id="text_sandbox">
+			<p>업로드할 파일을 여기에...</p>
+			<p>File to upload here...</p>
+			<p>うpするファイルをここに…</p>
+		</div>
+	</div>
+</body>
+</html>
